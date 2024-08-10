@@ -1,0 +1,43 @@
+.app-header {
+  background-color: var(--clr1);
+  color: var(--clr2bg-light);
+}
+
+.header-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.app-nav {
+  display: flex;
+  gap: 15px;
+}
+
+a.active {
+  color: rgb(241, 212, 241);
+  font-weight: 600;
+  text-decoration: underline;
+}
+.form-modal .ant-modal-content {
+  width: 400px;
+}
+.form-modal form > section {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  width: 300px;
+}
+.form-modal form > div {
+  display: flex;
+  align-items: start;
+  justify-content: end;
+  width: 100%;
+  padding-right: 45px;
+}
+
+@media (max-width: 720px) {
+  .app-header {
+    color: var(--clr2bg-light);
+  }
+}
