@@ -2,8 +2,11 @@ import Axios from "axios";
 const axios = Axios.create({
   withCredentials: true,
 });
-const BASE_URL = "http://localhost:3030/api/auth/";
 
+const BASE_URL =
+  process.env.NODE_ENV === "production"
+    ? "/api/auth/"
+    : "http://localhost:3030/api/auth/";
 export const authService = {
   login,
   signUp,
