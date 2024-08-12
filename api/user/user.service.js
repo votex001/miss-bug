@@ -24,6 +24,7 @@ async function save(user) {
 
     users.push(user);
     await _saveUsersToFile();
+    return user.username;
   } catch (err) {
     loggerService.error("userService[save] : ", err);
     throw err;
