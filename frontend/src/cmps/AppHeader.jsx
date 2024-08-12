@@ -91,7 +91,7 @@ export function AppHeader({ setUser, user }) {
         </div>
         <Modal
           open={openLogin}
-          onCancel={onClose}
+          closeIcon={false}
           footer=""
           className="form-modal reg"
         >
@@ -129,7 +129,7 @@ export function AppHeader({ setUser, user }) {
         </Modal>
         <Modal
           open={openRegistration}
-          onCancel={onClose}
+          closeIcon={false}
           footer=""
           className="form-modal reg"
         >

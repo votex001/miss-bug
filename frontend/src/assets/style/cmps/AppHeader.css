@@ -20,7 +20,11 @@ a.active {
   text-decoration: underline;
 }
 .form-modal .ant-modal-content {
-  width: 400px;
+  width: 350px;
+  display: flex;
+}
+.form-modal .ant-modal-footer {
+  display: none;
 }
 .form-modal form > section {
   display: flex;
@@ -28,12 +32,49 @@ a.active {
   justify-content: space-between;
   width: 300px;
 }
+.form-modal .add-form {
+  display: flex;
+  flex-direction: column;
+}
+.form-modal .add-form > button {
+  align-self: flex-end;
+}
+.form-modal form > section.labels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  padding: 0 10px 10px 10px;
+}
+.form-modal form > section.labels > section {
+  max-width: max-content;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  background-color: #99999975;
+  padding: 5px;
+  border-radius: 5px;
+}
+.form-modal form > section.labels > section > .label {
+  white-space: nowrap; /* Prevents the text from wrapping to the next line */
+  overflow: hidden; /* Hides overflowed content */
+  text-overflow: ellipsis;
+}
+.form-modal form > section.labels > section > .delete {
+  margin-left: auto;
+  margin-right: 5px;
+  cursor: pointer;
+}
+.form-modal form > section > textarea {
+  resize: none;
+  width: 177px;
+}
 .form-modal form > div {
   display: flex;
   align-items: start;
   justify-content: end;
   width: 100%;
-  padding-right: 45px;
+  padding: 0;
+  margin: 0;
 }
 
 @media (max-width: 720px) {

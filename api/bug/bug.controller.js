@@ -26,10 +26,17 @@ export async function getBug(req, res) {
   }
 }
 export async function postBug(req, res) {
-  const { title, severity, ownerId } = req.body;
-  if (!title || !severity || !ownerId)
+  const { title, severity, labels, description, ownerId } = req.body;
+
+  if (!title || !severity || !ownerId || !description)
     return res.status(400).send("Couldn't save bug");
-  const bugToSave = { title, severity: +severity, ownerId };
+  const bugToSave = {
+    title,
+    severity: +severity,
+    ownerId,
+    labels,
+    description,
+  };
   try {
     const savedBug = await bugService.save(bugToSave);
     res.send(savedBug);
@@ -39,11 +46,19 @@ export async function postBug(req, res) {
   }
 }
 export async function putBug(req, res) {
-  const { title, severity, _id } = req.body;
-  if (!title || !severity || !_id)
+  const { title, severity, labels, description, ownerId, _id } = req.body;
+
+  if (!title || !severity || !ownerId || !description || !_id)
     return res.status(400).send("Couldn't save bug");
 
-  const bugToSave = { title, severity: +severity, _id };
+  const bugToSave = {
+    title,
+    severity: +severity,
+    ownerId,
+    labels,
+    description,
+    _id,
+  };
   try {
     const savedBug = await bugService.save(bugToSave);
     res.send(savedBug);

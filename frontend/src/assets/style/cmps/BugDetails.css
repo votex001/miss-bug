@@ -1,14 +1,34 @@
 .bug-details h3 {
-    color: var(--clr1);
-    font-size: 2em;
+  color: var(--clr1);
+  font-size: 2em;
 }
 
 .bug-details h4 {
-    color: var(--clr2);
+  color: var(--clr2);
 }
 
 .bug-details img {
-    max-width: 200px;
-    display: block;
-    margin: auto;
+  max-width: 200px;
+  display: block;
+  margin: auto;
+}
+.bug-details .labels {
+ display: flex;
+}
+.bug-details .labels .label {
+  cursor: default;
+  max-width: max-content;
+  min-width: fit-content;
+  display: flex;
+  flex-direction: row;
+  background-color: #8d4444;
+  padding: 5px;
+  border-radius: 5px;
+  margin: 5px;
+}
+.bug-details .description{
+    margin-bottom: 30px;
+}
+.bug-details .description h4{
+    font-size: 26px;
 }
