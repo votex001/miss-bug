@@ -17,9 +17,9 @@ export const bugService = {
   remove,
 };
 
-async function query() {
+async function query(filterBy) {
   try {
-    const { data: bugs } = await axios.get(BASE_URL);
+    const { data: bugs } = await axios.get(BASE_URL, { params: filterBy });
     return bugs;
   } catch (err) {
     console.log(err);

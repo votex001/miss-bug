@@ -6,8 +6,14 @@ import fs from "fs";
 import { authService } from "../auth/auth.service.js";
 
 export async function getBugs(req, res) {
+  const { sortBy, txt, minSeverity, label } = req.query;
   try {
-    const bugs = await bugService.query();
+    const bugs = await bugService.query({
+      sortBy,
+      txt,
+      minSeverity: +minSeverity,
+      label,
+    });
     res.send(bugs);
   } catch (err) {
     loggerService.error("err:", err);

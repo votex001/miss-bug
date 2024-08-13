@@ -10,9 +10,46 @@ export const bugService = {
   save,
 };
 
-async function query() {
+async function query(filterBy) {
   try {
-    return bugs;
+    let sortedBugs = bugs;
+    if (filterBy.sortBy) {
+      switch (filterBy.sortBy) {
+        case "createdAt":
+          sortedBugs = sortedBugs.sort((a, b) => {
+            return new Date(b.createdAt) - new Date(a.createdAt);
+          });
+        case "title":
+          sortedBugs = sortedBugs.sort((a, b) =>
+            a.title.localeCompare(b.title)
+          );
+          break;
+        case "severity":
+          sortedBugs = sortedBugs.sort((a, b) => a.severity - b.severity);
+          break;
+      }
+    } else {
+      sortedBugs = sortedBugs.sort((a, b) => {
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      });
+    }
+    if (filterBy.txt) {
+      const searchText = filterBy.txt.trim();
+      const regex = new RegExp(searchText, "i");
+      sortedBugs = sortedBugs.filter((bug) => regex.test(bug.title));
+    }
+    if (filterBy.minSeverity) {
+      sortedBugs = sortedBugs.filter((bug) => {
+        return bug.severity >= filterBy.minSeverity;
+      });
+    }
+    if (filterBy.label) {
+      sortedBugs = sortedBugs.filter((bug) => {
+        return bug.labels.some((label) => label.name === filterBy.label);
+      });
+    }
+
+    return sortedBugs;
   } catch (err) {
     console.log("Couldn't find bugs", err);
     throw err;
@@ -55,6 +92,7 @@ async function save(bugToSave) {
       bugs[bugIdx] = bugToSave;
     } else {
       bugToSave._id = makeId();
+      bugToSave.createdAt = Date.now();
       bugs.push(bugToSave);
     }
     _saveBugsToFile();
