@@ -53,25 +53,7 @@ export async function signup(req, res) {
     res.status(400).send({ err: "Failed to signup" });
   }
 }
-export async function checkUser(req, res) {
-  try {
-    const user = authService.validateToken(req.cookies.loginToken);
-    const existUser = user
-      ? await userService.getByUsername(user.username)
-      : null;
 
-    if (!existUser) {
-      res.send();
-    } else {
-      res.status(200).send(user);
-    }
-
-    res.send();
-  } catch (err) {
-    console.log(err);
-    res.status(401).send({ err: "Failed to check" });
-  }
-}
 export async function logout(req, res) {
   try {
     res.clearCookie("loginToken", {

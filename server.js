@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import path from "path";
 import { bugRoutes } from "./api/bug/bug.routes.js";
 import { authRoutes } from "./api/auth/auth.routes.js";
+import { userRouter } from "./api/user/user.routes.js";
 
 const app = express();
 
@@ -25,6 +26,7 @@ app.use(express.json());
 //Routes
 app.use("/api/bug", bugRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/user", userRouter);
 
 app.get("/api/logs", requiredAdmin, async (req, res) => {
   const path = process.cwd() + "/logs/backend.log";

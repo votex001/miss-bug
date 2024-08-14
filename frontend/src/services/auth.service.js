@@ -7,10 +7,10 @@ const BASE_URL =
   process.env.NODE_ENV === "production"
     ? "/api/auth/"
     : "http://localhost:3030/api/auth/";
+
 export const authService = {
   login,
   signUp,
-  validateUser,
   logout,
 };
 
@@ -34,15 +34,6 @@ async function signUp(credentials) {
   }
 }
 
-async function validateUser() {
-  const url = BASE_URL + "checkToken";
-  try {
-    const { data: user } = await axios.post(url);
-    return user;
-  } catch (err) {
-    throw err;
-  }
-}
 async function logout() {
   const url = BASE_URL + "logout";
   try {

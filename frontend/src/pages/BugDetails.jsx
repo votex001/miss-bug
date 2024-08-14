@@ -11,7 +11,7 @@ export function BugDetails() {
 
   useEffect(() => {
     loadBug();
-  }, []);
+  }, [bugId]);
 
   async function loadBug() {
     try {
@@ -42,7 +42,7 @@ export function BugDetails() {
       <section className="description">
         <h4>Description</h4>
         {bug.description}
-        </section>
+      </section>
       <Link to="/bug">Back to List</Link>
     </div>
   );

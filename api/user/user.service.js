@@ -6,6 +6,7 @@ const users = readJsonFile("data/users.json");
 export const userService = {
   save,
   getByUsername,
+  getById,
 };
 
 async function getByUsername(username) {
@@ -17,6 +18,16 @@ async function getByUsername(username) {
     throw err;
   }
 }
+async function getById(id) {
+  try {
+    const user = users.find((user) => user._id === id);
+    return user;
+  } catch (err) {
+    console.log(err);
+    throw err;
+  }
+}
+
 async function save(user) {
   try {
     user._id = makeId();

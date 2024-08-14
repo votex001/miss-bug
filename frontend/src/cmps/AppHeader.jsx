@@ -1,7 +1,8 @@
 import { Modal } from "antd";
 import { useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { authService } from "../services/auth.service";
+import { userService } from "../services/user.service";
 
 export function AppHeader({ setUser, user }) {
   const [openLogin, setOpenLogin] = useState(false);
@@ -17,7 +18,7 @@ export function AppHeader({ setUser, user }) {
   }, []);
 
   async function existUser() {
-    const user = await authService.validateUser();
+    const user = await userService.validateUser();
     if (user) {
       setUser(user);
     } else {
@@ -79,7 +80,7 @@ export function AppHeader({ setUser, user }) {
         <div className="non-user-btns">
           {user ? (
             <div>
-              <span>{user.username}</span>
+              <Link to={`/u/${user.id}`}>{user.username}</Link>
               <button onClick={onLogout}>Logout</button>
             </div>
           ) : (
