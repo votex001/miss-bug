@@ -1,7 +1,5 @@
-import fs from "fs";
-import { makeId, readJsonFile } from "../../services/util.service.js";
-
-const bugs = readJsonFile("data/bugs.json");
+import { getCollection } from "../../data/mongoDb.js";
+import { ObjectId } from "mongodb";
 
 export const bugService = {
   query,
@@ -12,44 +10,36 @@ export const bugService = {
 
 async function query(filterBy) {
   try {
-    let sortedBugs = bugs;
+    const bugs = await getCollection("bugs");
+    let cursor = bugs.find();
+
     if (filterBy.sortBy) {
       switch (filterBy.sortBy) {
         case "createdAt":
-          sortedBugs = sortedBugs.sort((a, b) => {
-            return new Date(b.createdAt) - new Date(a.createdAt);
-          });
+          cursor = cursor.sort({ _id: -1 });
+          break;
         case "title":
-          sortedBugs = sortedBugs.sort((a, b) =>
-            a.title.localeCompare(b.title)
-          );
+          cursor = cursor.sort({ title: 1 });
           break;
         case "severity":
-          sortedBugs = sortedBugs.sort((a, b) => a.severity - b.severity);
+          cursor = cursor.sort({ severity: -1 });
           break;
       }
     } else {
-      sortedBugs = sortedBugs.sort((a, b) => {
-        return new Date(b.createdAt) - new Date(a.createdAt);
-      });
+      cursor = cursor.sort({ _id: -1 });
     }
     if (filterBy.txt) {
       const searchText = filterBy.txt.trim();
       const regex = new RegExp(searchText, "i");
-      sortedBugs = sortedBugs.filter((bug) => regex.test(bug.title));
+      cursor.filter({ title: regex });
     }
     if (filterBy.minSeverity) {
-      sortedBugs = sortedBugs.filter((bug) => {
-        return bug.severity >= filterBy.minSeverity;
-      });
+      cursor.filter({ severity: { $gte: filterBy.minSeverity } });
     }
     if (filterBy.label) {
-      sortedBugs = sortedBugs.filter((bug) => {
-        return bug.labels.some((label) => label.name === filterBy.label);
-      });
+      cursor.filter({ "labels.name": filterBy.label });
     }
-
-    return sortedBugs;
+    return await cursor.toArray();
   } catch (err) {
     console.log("Couldn't find bugs", err);
     throw err;
@@ -58,10 +48,13 @@ async function query(filterBy) {
 
 async function getById(bugId) {
   try {
-    const bug = bugs.find((bug) => bug._id === bugId);
+    const cursor = await getCollection("bugs");
+
+    const bug = cursor.findOne({ _id: ObjectId.createFromHexString(bugId) });
     if (!bug) {
       throw `Couldn't find bug ${bugId}`;
     }
+
     return bug;
   } catch (err) {
     console.log(err);
@@ -70,12 +63,14 @@ async function getById(bugId) {
 }
 async function remove(bugId) {
   try {
-    const bugIdx = bugs.findIndex((bug) => bug._id === bugId);
-    if (bugIdx < 0) {
+    const cursor = await getCollection("bugs");
+
+    const result = cursor.deleteOne({
+      _id: ObjectId.createFromHexString(bugId),
+    });
+    if (result.matchedCount === 0) {
       throw `Couldn't remove bug with id ${bugId}`;
     }
-    bugs.splice(bugIdx, 1);
-    return _saveBugsToFile();
   } catch (err) {
     console.log("Couldn't find bug", err);
     throw err;
@@ -83,32 +78,28 @@ async function remove(bugId) {
 }
 
 async function save(bugToSave) {
+  bugToSave.ownerId = new ObjectId(bugToSave.ownerId);
+
   try {
+    const bugs = await getCollection("bugs");
     if (bugToSave._id) {
-      const bugIdx = bugs.findIndex((bug) => bug._id === bugToSave._id);
-      if (bugIdx < 0) {
-        throw `Couldn't update bug with id ${bugId}`;
+      const { _id, ...updateFields } = bugToSave;
+      const result = await bugs.updateOne(
+        {
+          _id: ObjectId.createFromHexString(_id),
+        },
+        { $set: updateFields }
+      );
+      if (result.matchedCount === 0) {
+        throw `Couldn't update bug with id ${_id}`;
       }
-      bugs[bugIdx] = bugToSave;
     } else {
-      bugToSave._id = makeId();
-      bugToSave.createdAt = Date.now();
-      bugs.push(bugToSave);
+      await bugs.insertOne(bugToSave);
     }
-    _saveBugsToFile();
+
     return bugToSave;
   } catch (err) {
     console.log("Couldn't find bug", err);
     throw err;
   }
-}
-
-function _saveBugsToFile(path = "data/bugs.json") {
-  return new Promise((resolve, reject) => {
-    const data = JSON.stringify(bugs, null, 4);
-    fs.writeFile(path, data, (err) => {
-      if (err) return reject(err);
-      resolve();
-    });
-  });
 }

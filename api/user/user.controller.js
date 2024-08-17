@@ -1,3 +1,4 @@
+import { ObjectId } from "mongodb";
 import { loggerService } from "../../services/logger.service.js";
 import { authService } from "../auth/auth.service.js";
 import { userService } from "./user.service.js";
@@ -5,9 +6,7 @@ import { userService } from "./user.service.js";
 export async function checkUser(req, res) {
   try {
     const user = authService.validateToken(req.cookies.loginToken);
-    const existUser = user
-      ? await userService.getByUsername(user.username)
-      : null;
+    const existUser = user ? await userService.getById(user.id) : null;
 
     if (!existUser) {
       res.send();
@@ -26,11 +25,16 @@ export async function userById(req, res) {
   try {
     const existUser = await userService.getById(id);
     if (!existUser) res.status(400).send("Couldn't get user");
+    const existingObjectId = new ObjectId(existUser._id)
+      .getTimestamp()
+      .getTime();
+
     const userParams = {
       username: existUser.username,
       email: existUser.email,
-      createdAt: existUser.createdAt,
+      createdAt: existingObjectId,
       isAdmin: existUser.isAdmin,
+      foundBugs:existUser.foundBugs
     };
     res.send(userParams);
   } catch (err) {

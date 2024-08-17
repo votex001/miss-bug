@@ -1,8 +1,7 @@
-import fs from "fs";
-import { makeId, readJsonFile } from "../../services/util.service.js";
 import { loggerService } from "../../services/logger.service.js";
+import { getCollection } from "../../data/mongoDb.js";
+import { ObjectId } from "mongodb";
 
-const users = readJsonFile("data/users.json");
 export const userService = {
   save,
   getByUsername,
@@ -11,7 +10,9 @@ export const userService = {
 
 async function getByUsername(username) {
   try {
-    const user = users.find((user) => user.username === username);
+    const users = await getCollection("users");
+
+    const user = users.findOne({ username });
     return user;
   } catch (err) {
     console.log(err);
@@ -20,8 +21,22 @@ async function getByUsername(username) {
 }
 async function getById(id) {
   try {
-    const user = users.find((user) => user._id === id);
-    return user;
+    const users = await getCollection("users");
+
+    const user = await users
+      .aggregate([
+        { $match: { _id: ObjectId.createFromHexString(id) } },
+        {
+          $lookup: {
+            localField: "_id",
+            from: "bugs",
+            foreignField: "ownerId",
+            as: "foundBugs",
+          },
+        },
+      ])
+      .toArray();
+    return user[0];
   } catch (err) {
     console.log(err);
     throw err;
@@ -30,24 +45,11 @@ async function getById(id) {
 
 async function save(user) {
   try {
-    user._id = makeId();
-    user.createdAt = Date.now();
-
-    users.push(user);
-    await _saveUsersToFile();
+    const users = await getCollection("users");
+    users.insertOne(user);
     return user.username;
   } catch (err) {
     loggerService.error("userService[save] : ", err);
     throw err;
   }
-}
-
-function _saveUsersToFile(path = "data/users.json") {
-  return new Promise((resolve, reject) => {
-    const data = JSON.stringify(users, null, 4);
-    fs.writeFile(path, data, (err) => {
-      if (err) return reject(err);
-      resolve();
-    });
-  });
 }

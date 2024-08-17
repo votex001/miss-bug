@@ -176,7 +176,7 @@ export function BugIndex({ user }) {
     const bugs = await bugService.query();
     const labelsSet = new Set();
     bugs.forEach((item) => {
-      item.labels.forEach((label) => {
+      item.labels?.forEach((label) => {
         labelsSet.add(label.name);
       });
     });
