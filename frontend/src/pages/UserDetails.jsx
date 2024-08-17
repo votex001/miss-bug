@@ -2,6 +2,11 @@ import { useEffect, useState } from "react";
 import { userService } from "../services/user.service";
 import { useParams } from "react-router";
 import { showErrorMsg } from "../services/event-bus.service";
+import {
+  SOCKET_EMIT_USER_WATCH,
+  SOCKET_EVENT_USER_UPDATED,
+  socketService,
+} from "../services/socket.service";
 
 export function UserDetails() {
   const [user, setUser] = useState(null);
@@ -9,11 +14,16 @@ export function UserDetails() {
 
   useEffect(() => {
     loadUser();
+    socketService.emit(SOCKET_EMIT_USER_WATCH, userId);
+    socketService.on(SOCKET_EVENT_USER_UPDATED, updateUser);
+    console.log("lol")
+    return () => {
+      socketService.off(SOCKET_EVENT_USER_UPDATED, updateUser);
+    };
   }, [userId]);
-
-  useEffect(() => {
-    console.log(user);
-  }, [user]);
+  function updateUser(data) {
+    setUser(data)
+  }
 
   async function loadUser() {
     try {

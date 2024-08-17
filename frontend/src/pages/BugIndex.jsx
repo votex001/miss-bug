@@ -5,7 +5,11 @@ import { useRef, useState } from "react";
 import { useEffect } from "react";
 import { utilService } from "../services/util.service.js";
 import { EditBug } from "../cmps/EditBug.jsx";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import {
+  SOCKET_EVENT_BUG_CHANGES,
+  socketService,
+} from "../services/socket.service.js";
 
 export function BugIndex({ user }) {
   const [bugs, setBugs] = useState([]);
@@ -26,6 +30,7 @@ export function BugIndex({ user }) {
     labels: [],
     description: "",
   });
+
   useEffect(() => {
     const sortParams = searchParams.get("sortBy");
     const txt = searchParams.get("txt");
@@ -46,8 +51,25 @@ export function BugIndex({ user }) {
       minSeverity: severity,
       label,
     };
-
+    socketService.on(SOCKET_EVENT_BUG_CHANGES, () => {
+      loadBugs({
+        sortBy: sortParams,
+        txt,
+        minSeverity: severity,
+        label,
+      });
+    });
     loadBugs(params);
+    return () => {
+      socketService.off(SOCKET_EVENT_BUG_CHANGES, () => {
+        loadBugs({
+          sortBy: sortParams,
+          txt,
+          minSeverity: severity,
+          label,
+        });
+      });
+    };
   }, [searchParams]);
 
   async function loadBugs(params) {

@@ -1,4 +1,5 @@
 // app.js
+import http from "http";
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
@@ -6,8 +7,10 @@ import path from "path";
 import { bugRoutes } from "./api/bug/bug.routes.js";
 import { authRoutes } from "./api/auth/auth.routes.js";
 import { userRouter } from "./api/user/user.routes.js";
+import { setupSocketAPI } from "./services/socket.service.js";
 
 const app = express();
+const server = http.createServer(app);
 
 const corsOptions = {
   origin: [
@@ -27,6 +30,7 @@ app.use(express.json());
 app.use("/api/bug", bugRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRouter);
+setupSocketAPI(server);
 
 app.get("/api/logs", requiredAdmin, async (req, res) => {
   const path = process.cwd() + "/logs/backend.log";
@@ -50,6 +54,6 @@ app.get("**", (req, res) => {
 });
 
 const port = 3030;
-app.listen(port, () => {
+server.listen(port, () => {
   console.log(`Server listening on port http://127.0.0.1:${port}`);
 });

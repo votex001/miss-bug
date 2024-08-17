@@ -1,5 +1,7 @@
 import { getCollection } from "../../data/mongoDb.js";
 import { ObjectId } from "mongodb";
+import { userService } from "../user/user.service.js";
+import { socketService } from "../../services/socket.service.js";
 
 export const bugService = {
   query,
@@ -64,13 +66,20 @@ async function getById(bugId) {
 async function remove(bugId) {
   try {
     const cursor = await getCollection("bugs");
-
+    const bug = await getById(bugId);
     const result = cursor.deleteOne({
       _id: ObjectId.createFromHexString(bugId),
     });
     if (result.matchedCount === 0) {
       throw `Couldn't remove bug with id ${bugId}`;
     }
+    const user = await userService.getById(bug.ownerId.toHexString());
+    socketService.emitTo({
+      label: user._id,
+      data: user,
+      type: "user-updated",
+    });
+    socketService.emitTo({ type: "bug-changes" });
   } catch (err) {
     console.log("Couldn't find bug", err);
     throw err;
@@ -79,7 +88,6 @@ async function remove(bugId) {
 
 async function save(bugToSave) {
   bugToSave.ownerId = new ObjectId(bugToSave.ownerId);
-
   try {
     const bugs = await getCollection("bugs");
     if (bugToSave._id) {
@@ -96,6 +104,13 @@ async function save(bugToSave) {
     } else {
       await bugs.insertOne(bugToSave);
     }
+    const user = await userService.getById(bugToSave.ownerId.toHexString());
+    socketService.emitTo({
+      label: user._id,
+      data: user,
+      type: "user-updated",
+    });
+    socketService.emitTo({ type: "bug-changes" });
 
     return bugToSave;
   } catch (err) {
